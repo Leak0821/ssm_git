@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <!--spring的声明式事务处理-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <!--事务通知方法,对切入点细化-->
+    <tx:advice id="myAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="save*" read-only="false" isolation="DEFAULT" propagation="REQUIRED"/>
+            <tx:method name="insert*" read-only="false" isolation="DEFAULT" propagation="REQUIRED"/>
+            <tx:method name="update*" read-only="false" isolation="DEFAULT" propagation="REQUIRED"/>
+            <tx:method name="edit*" read-only="false" isolation="DEFAULT" propagation="REQUIRED"/>
+            <tx:method name="delete*" read-only="false" isolation="DEFAULT" propagation="REQUIRED"/>
+            <tx:method name="*" read-only="true"/>
+        </tx:attributes>
+    </tx:advice>
+    
+    <!--使用spring的aop，配置声明式事务处理，配置切入点（Service层的方法），
+          让通知（事务）关联切入点（Service层的方法）-->
+    <aop:config>
+        <aop:pointcut id="myPointCut" expression="execution(* com.it.ssm.service..*.*(..))"></aop:pointcut>
+        <aop:advisor advice-ref="myAdvice" pointcut-ref="myPointCut"></aop:advisor>
+    </aop:config>
+
+    <!--引入spring-mybatis配置-->
+    <import resource="classpath:spring-mybatis.xml"/>
+</beans>
